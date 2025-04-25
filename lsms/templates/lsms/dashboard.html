@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Subscription Dashboard</h2>
+    {% if subscription %}
+        <p><strong>Plan:</strong> {{ subscription.plan }}</p>
+        <p><strong>Start Date:</strong> {{ subscription.start_date }}</p>
+        <p><strong>End Date:</strong> {{ subscription.end_date }}</p>
+        <p><strong>Status:</strong> {{ subscription.status }}</p>
+    {% else %}
+        <p>No active subscription found.</p>
+    {% endif %}
+    <a href="{% url 'lsms:subscribe-view' %}" class="btn btn-primary mt-3">Subscribe / Upgrade</a>
+</div>
+{% endblock %}

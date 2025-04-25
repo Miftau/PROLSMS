@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">👩‍🏫 Teacher Dashboard</h2>
+
+    <div class="row">
+        <!-- Active Classrooms Card -->
+        <div class="col-md-4">
+            <div class="card text-bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">My Classrooms</h5>
+                    <p class="card-text fs-2">{{ classroom_count }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Count Card -->
+        <div class="col-md-4">
+            <div class="card text-bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Assignments Given</h5>
+                    <p class="card-text fs-2">{{ assignment_count }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submissions Card -->
+        <div class="col-md-4">
+            <div class="card text-bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Submissions</h5>
+                    <p class="card-text fs-2">{{ submission_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Chart -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Student Performance (Average Grades)</h5>
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const performanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ performance_data.labels|safe }},
+            datasets: [{
+                label: 'Average Score (%)',
+                data: {{ performance_data.data|safe }},
+                backgroundColor: 'rgba(13, 110, 253, 0.7)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

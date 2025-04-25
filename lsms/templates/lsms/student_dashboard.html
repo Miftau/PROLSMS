@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">🧑‍🎓 Student Dashboard</h2>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-header">📚 Upcoming Assignments</div>
+                <ul class="list-group list-group-flush">
+                    {% for assignment in assignments %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ assignment.title }}
+                            <span class="badge bg-primary">{{ assignment.due_date|date:"M d" }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">No assignments due.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-header">📢 Latest Announcements</div>
+                <ul class="list-group list-group-flush">
+                    {% for announcement in announcements %}
+                        <li class="list-group-item">{{ announcement.title }}</li>
+                    {% empty %}
+                        <li class="list-group-item">No announcements.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h5 class="card-title">📈 My Performance</h5>
+            <canvas id="gradeTrendChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('gradeTrendChart').getContext('2d');
+const gradeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ grade_labels|safe }},
+        datasets: [{
+            label: 'Score',
+            data: {{ grade_data|safe }},
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            fill: true,
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true, max: 100 }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+:root {
+  --lsms-primary: #b10505;
+  --lsms-accent: #090213;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f8f9fa;
+}
+
+.navbar-brand img {
+  height: 40px;
+}

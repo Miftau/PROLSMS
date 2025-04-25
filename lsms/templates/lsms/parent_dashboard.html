@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">👨‍👩‍👧 Parent Dashboard</h2>
+
+    {% for child in children %}
+    <div class="card mb-4 shadow">
+        <div class="card-body">
+            <h5 class="card-title">{{ child.user.get_full_name }}</h5>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <p><strong>Average Grade:</strong> {{ child.avg_score }}%</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Attendance:</strong> {{ child.attended_days }} of {{ child.total_days }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Outstanding Fees:</strong> ₦{{ child.outstanding_fees }}</p>
+                </div>
+            </div>
+
+            <canvas id="gradeChart{{ forloop.counter }}"></canvas>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% for child in children %}
+new Chart(document.getElementById('gradeChart{{ forloop.counter }}'), {
+    type: 'line',
+    data: {
+        labels: {{ child.grade_labels|safe }},
+        datasets: [{
+            label: 'Grades Over Time',
+            data: {{ child.grade_data|safe }},
+            borderColor: 'rgba(40, 167, 69, 1)',
+            backgroundColor: 'rgba(40, 167, 69, 0.2)',
+            fill: true,
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true, max: 100 }
+        }
+    }
+});
+{% endfor %}
+</script>
+{% endblock %}

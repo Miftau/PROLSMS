@@ -2,6 +2,8 @@
 
 from pathlib import Path
 import os
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,6 +81,9 @@ SESSION_COOKIE_NAME = 'sessionid'  # Default
 
 
 WSGI_APPLICATION = 'PROLSMS.wsgi.application'
+INSTALLED_APPS += ['channels']
+INSTALLED_APPS += ['chat']
+ASGI_APPLICATION = 'PROLSMS.asgi.application'
 
 
 # Database
@@ -144,11 +149,19 @@ LOGIN_REDIRECT_URL = '/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Email Verification settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'djangproj@gmail.com'
-EMAIL_HOST_PASSWORD = 'Baba##thunday99'  # Use App Password, not Gmail password
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+FLUTTERWAVE_SECRET_KEY = os.getenv("FLUTTERWAVE_SECRET_KEY")
+FLUTTERWAVE_PUBLIC_KEY = os.getenv("FLUTTERWAVE_PUBLIC_KEY")
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
+
+TEMPLATES[0]['OPTIONS']['context_processors'] += [
+    'lsms.context_processors.notification_context',
+]
+
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+

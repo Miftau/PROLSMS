@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container text-center py-5">
+    <h1 class="display-4 mb-4">Welcome to PROGRESS LSMS</h1>
+    <p class="lead">An all-in-one Learning and School Management System.</p>
+    {% if user.is_authenticated %}
+        <a href="{% url 'dashboard-redirect' %}" class="btn btn-success mt-3">Go to Dashboard</a>
+    {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary mt-3">Sign In</a>
+        <a href="{% url 'signup' %}" class="btn btn-outline-primary mt-3 ms-2">Create Account</a>
+    {% endif %}
+</div>
+{% endblock %}

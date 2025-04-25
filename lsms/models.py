@@ -11,6 +11,7 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     institution = models.ForeignKey('ClientInstitution', on_delete=models.SET_NULL, null=True, blank=True)
+    is_active = models.BooleanField(default=False)
 
 class ClientInstitution(models.Model):
     name = models.CharField(max_length=255)
@@ -180,4 +181,79 @@ class TicketResponse(models.Model):
 
     def __str__(self):
         return f"Response by {self.responder.username} on {self.responded_at}"
+
+class Exam(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    def __str__(self):
+        return self.title
+
+class Question(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    question_text = models.TextField()
+    question_type = models.CharField(max_length=50, choices=[('multiple_choice', 'Multiple Choice'), ('true_false', 'True/False')])
+
+    def __str__(self):
+        return self.question_text
+
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=255)
+    is_correct = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.choice_text
+
+class StudentResponse(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    selected_choice = models.ForeignKey(Choice, on_delete=models.SET_NULL, null=True, blank=True)
+    answer_text = models.TextField(null=True, blank=True)  # For open-ended questions
+
+    def __str__(self):
+        return f"Response by {self.student.user.username} for {self.question}"
+
+class SubscriptionPlan(models.Model):
+    objects = None
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration_months = models.PositiveIntegerField()  # e.g. 1 month, 3 months
+    features = models.TextField()  # Features included in the plan
+    
+    max_students = models.PositiveIntegerField(default=100)
+    max_teachers = models.PositiveIntegerField(default=10)
+    max_parents = models.PositiveIntegerField(default=100)
+
+    def __str__(self):
+        return self.name
+
+class ClientSubscription(models.Model):
+    objects = None
+    client_institution = models.ForeignKey(ClientInstitution, on_delete=models.CASCADE)
+    plan = models.ForeignKey(SubscriptionPlan, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.client_institution.name} - {self.plan.name}"
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    url = models.URLField(blank=True, null=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.recipient.username} - {self.message[:40]}"
+
+
 

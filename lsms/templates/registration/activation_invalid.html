@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5 text-center">
+    <h2 class="text-danger mb-3">⚠️ Invalid Activation Link</h2>
+    <p>Sorry, the activation link is invalid or has expired.</p>
+    <a href="{% url 'signup' %}" class="btn btn-outline-primary mt-3">Try Signing Up Again</a>
+</div>
+{% endblock %}

@@ -3,12 +3,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
-    User, ClientInstitution,
+    Notification, User, ClientInstitution,
     StudentProfile, TeacherProfile, ParentProfile,
     Course, Classroom, Assignment, Grade, LessonContent,
     AttendanceRecord, Message, Announcement,
     FeeInvoice, Payment, PaymentPlan, PaymentInstallment,
-    SupportTicket, TicketResponse
+    SupportTicket, TicketResponse, SubscriptionPlan, ClientSubscription
 )
 
 # ========== USER & INSTITUTION ==========
@@ -131,3 +131,19 @@ class SupportTicketAdmin(admin.ModelAdmin):
 class TicketResponseAdmin(admin.ModelAdmin):
     list_display = ('ticket', 'responder', 'responded_at')
 
+@admin.register(SubscriptionPlan)
+class SubscriptionPlanAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price', 'duration_months', 'max_students', 'max_teachers')
+    list_editable = ('max_students', 'max_teachers')
+
+@admin.register(ClientSubscription)
+class ClientSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('client_institution', 'plan', 'start_date', 'end_date', 'is_active')
+    list_filter = ('is_active', 'plan')
+    search_fields = ('client_institution__name',)
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('recipient', 'message', 'is_read', 'created_at')
+    list_filter = ('recipient__role', 'is_read')
+    search_fields = ('recipient__username', 'message')

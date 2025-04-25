@@ -107,3 +107,48 @@ class TicketResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketResponse
         fields = '__all__'
+
+class ChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Choice
+        fields = '__all__'
+
+class QuestionSerializer(serializers.ModelSerializer):
+    choices = ChoiceSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Question
+        fields = '__all__'
+
+class ExamSerializer(serializers.ModelSerializer):
+    questions = QuestionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Exam
+        fields = '__all__'
+
+class StudentResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentResponse
+        fields = '__all__'
+
+class SubscriptionPlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubscriptionPlan
+        fields = '__all__'
+
+class ClientSubscriptionSerializer(serializers.ModelSerializer):
+    plan = SubscriptionPlanSerializer()
+
+    class Meta:
+        model = ClientSubscription
+        fields = '__all__'
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        
+    def unread_count(self, request):
+        return Notification.objects.filter(recipient=request.user, is_read=False).count()
+   

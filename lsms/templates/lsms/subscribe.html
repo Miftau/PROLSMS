@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Subscribe to a Plan</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="plan_id">Select Plan:</label>
+            <select name="plan_id" class="form-control">
+                {% for plan in plans %}
+                <option value="{{ plan.id }}">{{ plan.name }} - ₦{{ plan.price }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success mt-2">Pay with Flutterwave</button>
+    </form>
+</div>
+{% endblock %}
