@@ -2,6 +2,8 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
 from .models import (
     Notification, User, ClientInstitution,
     StudentProfile, TeacherProfile, ParentProfile,
@@ -14,15 +16,19 @@ from .models import (
 # ========== USER & INSTITUTION ==========
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'role', 'institution', 'is_active', 'is_staff')
-    list_filter = ('role', 'institution', 'is_active')
+    list_display = ('username', 'email', 'role', 'institution', 'is_active', 'is_staff', 'is_superuser')
+    list_filter = ('role', 'institution', 'is_active', 'is_superuser')
     search_fields = ('username', 'email')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
         ('Institution & Role', {'fields': ('role', 'institution')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        ('Additional Info', {'fields': ('role', 'institution')})
     )
+    
+    def has_delete_permission(self, request, obj=None):
+        return True
 
 @admin.register(ClientInstitution)
 class ClientInstitutionAdmin(admin.ModelAdmin):
