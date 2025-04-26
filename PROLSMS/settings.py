@@ -4,6 +4,7 @@ from pathlib import Path
 import os
 from decouple import config
 import dj_database_url
+from django.conf.global_settings import EMAIL_USE_SSL
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -170,6 +171,7 @@ else:
     EMAIL_HOST = config('EMAIL_HOST')
     EMAIL_PORT = config('EMAIL_PORT', cast=int)
     EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+    EMAIL_USE_SSL = config('EMAIL_USE_SSL', cast=bool)
     EMAIL_HOST_USER = config('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
     DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
