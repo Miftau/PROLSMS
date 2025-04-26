@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('owner', 'Owner'),
@@ -9,7 +8,7 @@ class User(AbstractUser):
         ('parent', 'Parent'),
         ('student', 'Student'),
     )
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=100, choices=ROLE_CHOICES)
     institution = models.ForeignKey('ClientInstitution', on_delete=models.SET_NULL, null=True, blank=True)
     is_active = models.BooleanField(default=False)
 

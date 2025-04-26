@@ -8,36 +8,22 @@ from django.contrib.auth import views as auth_views
 from .subscription_view import InitializeFlutterwavePaymentView, flutterwave_callback_view
 from .dashboard_views import SubscriptionDashboardView
 from .client_views import dashboard_view, subscribe_view
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
 
-router = DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'institutions', ClientInstitutionViewSet)
-router.register(r'students', StudentProfileViewSet)
-router.register(r'teachers', TeacherProfileViewSet)
-router.register(r'parents', ParentProfileViewSet)
-router.register(r'courses', CourseViewSet)
-router.register(r'classrooms', ClassroomViewSet)
-router.register(r'assignments', AssignmentViewSet)
-router.register(r'grades', GradeViewSet)
-router.register(r'lesson-content', LessonContentViewSet)
-router.register(r'attendance', AttendanceRecordViewSet)
-router.register(r'messages', MessageViewSet)
-router.register(r'announcements', AnnouncementViewSet)
-router.register(r'fee-invoices', FeeInvoiceViewSet)
-router.register(r'payments', PaymentViewSet)
-router.register(r'payment-plans', PaymentPlanViewSet)
-router.register(r'payment-installments', PaymentInstallmentViewSet)
-router.register(r'support-tickets', SupportTicketViewSet)
-router.register(r'ticket-responses', TicketResponseViewSet)
-router.register(r'exams', ExamViewSet)
-router.register(r'questions', QuestionViewSet)
-router.register(r'student-responses', StudentResponseViewSet)
-router.register(r'subscription-plans', SubscriptionPlanViewSet)
-router.register(r'client-subscriptions', ClientSubscriptionViewSet)
 
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', index_view, name='index'),
+    path('accounts/signup/', signup_view, name='signup'),
+    path('api/', include('lsms.api_urls')),
+    path('admin/', admin.site.urls),
+    path(
+        'activate/<uidb64>/<token>/',
+        activate_account,
+        name='activate'
+    ),
 ]
 
 
@@ -55,7 +41,6 @@ urlpatterns += [
 urlpatterns += [
     path('dashboard/subscription/', SubscriptionDashboardView.as_view(), name='subscription-dashboard'),
     path('dashboard/', dashboard_redirect, name='dashboard-redirect'),
-    path('', index_view, name='index'),
 
 ]
 
@@ -79,4 +64,5 @@ urlpatterns += [
     path('activate/<uidb64>/<token>/', activate_account, name='activate'),
     path('accounts/resend-activation/', resend_activation_email, name='resend-activation'),
 ]
-
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

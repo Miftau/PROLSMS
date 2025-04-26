@@ -17,14 +17,31 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from lsms.views import index_view, signup_view, activate_account
 
 from . import settings
 from django.conf.urls.static import static
 
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('lsms.urls')),
+
+    # Django’s built-in auth (login, logout, password reset, etc.)
+    path('', include('django.contrib.auth.urls')),
+
+    # custom signup
+    path('accounts/signup/', signup_view, name='signup'),
+    path(
+        'activate/<uidb64>/<token>/',
+        activate_account,
+        name='activate'
+    ),
+
+    # API and frontend routes
+    path('api/', include('lsms.api_urls')),
+    path('', index_view, name='index'),
+    path('', include('lsms.urls')),
     
     # JWT Auth
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

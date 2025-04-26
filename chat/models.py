@@ -1,5 +1,8 @@
 from django.db import models
 
+from lsms.models import User
+
+
 class ChatRoom(models.Model):
     name = models.CharField(max_length=255)
     participants = models.ManyToManyField(User, related_name="chat_rooms")

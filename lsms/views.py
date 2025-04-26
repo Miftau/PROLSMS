@@ -1,7 +1,9 @@
 # Create your views here.
+from datetime import timezone
+
 from .serializers import NotificationSerializer
 from rest_framework import viewsets
-from .models import *
+from lsms.models import *
 from .serializers import *
 from .permissions import *
 from rest_framework.permissions import IsAuthenticated
@@ -25,186 +27,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 
-
-
-# === Core System ===
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsOwner]
-
-class ClientInstitutionViewSet(viewsets.ModelViewSet):
-    queryset = ClientInstitution.objects.all()
-    serializer_class = ClientInstitutionSerializer
-    permission_classes = [IsClientAdmin]
-
-# === Profiles ===
-class StudentProfileViewSet(viewsets.ModelViewSet):
-    queryset = StudentProfile.objects.all()
-    serializer_class = StudentProfileSerializer
-    permission_classes = [IsTeacher, IsClientAdmin, IsParent, IsStudent]
-
-class TeacherProfileViewSet(viewsets.ModelViewSet):
-    queryset = TeacherProfile.objects.all()
-    serializer_class = TeacherProfileSerializer
-    permission_classes = [IsTeacher, IsClientAdmin]
-
-class ParentProfileViewSet(viewsets.ModelViewSet):
-    queryset = ParentProfile.objects.all()
-    serializer_class = ParentProfileSerializer
-    permission_classes = [IsTeacher, IsClientAdmin, IsParent]
-
-# === Academic ===
-class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Course.objects.all()
-    serializer_class = CourseSerializer
-    permission_classes = [IsTeacher, IsClientAdmin]
-
-class ClassroomViewSet(viewsets.ModelViewSet):
-    queryset = Classroom.objects.all()
-    serializer_class = ClassroomSerializer
-    permission_classes = [IsTeacher, IsClientAdmin]
-
-class AssignmentViewSet(viewsets.ModelViewSet):
-    queryset = Assignment.objects.all()
-    serializer_class = AssignmentSerializer
-    permission_classes = [IsTeacher]  # or whatever you use
-
-    def perform_create(self, serializer):
-        assignment = serializer.save()
-        classroom = assignment.classroom
-        for student in classroom.students.all():
-            Notification.objects.create(
-                recipient=student.user,
-                message=f"New assignment: '{assignment.title}' for {classroom.name}",
-                url=f"/student/assignments/{assignment.id}/"
-            )
-        channel_layer = get_channel_layer()
-
-        async_to_sync(channel_layer.group_send)(
-            f"user_{User.id}",
-            {
-                "type": "send_notification",
-                "data": {
-                    "message": "New assignment posted",
-                    "url": "/student/assignments/123/",
-                },
-            },
-        )
-
-
-class GradeViewSet(viewsets.ModelViewSet):
-    queryset = Grade.objects.all()
-    serializer_class = GradeSerializer
-    permission_classes = [IsTeacher, IsClientAdmin, IsParent, IsStudent]
-    
-    def perform_create(self, serializer):
-        submission = serializer.save()
-        assignment = submission.assignment
-        teacher_user = assignment.classroom.teacher.user
-
-        Notification.objects.create(
-            recipient=teacher_user,
-            message=f"{submission.student.user.get_full_name()} submitted '{assignment.title}'",
-            url=f"/teacher/assignments/{assignment.id}/submissions/"
-        )
-
-class LessonContentViewSet(viewsets.ModelViewSet):
-    queryset = LessonContent.objects.all()
-    serializer_class = LessonContentSerializer
-    permission_classes = [IsTeacher, IsClientAdmin, IsParent, IsStudent]
-
-# === Attendance ===
-class AttendanceRecordViewSet(viewsets.ModelViewSet):
-    queryset = AttendanceRecord.objects.all()
-    serializer_class = AttendanceRecordSerializer
-    permission_classes = [IsTeacher, IsClientAdmin, IsParent, IsStudent]
-
-# === Communication ===
-class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
-    serializer_class = MessageSerializer
-    permission_classes = [IsTeacher, IsClientAdmin, IsParent, IsStudent]
-
-class AnnouncementViewSet(viewsets.ModelViewSet):
-    queryset = Announcement.objects.all()
-    serializer_class = AnnouncementSerializer
-    permission_classes = [IsTeacher, IsClientAdmin, IsParent, IsStudent]
-    
-    def perform_create(self, serializer):
-        announcement = serializer.save()
-        users = announcement.visible_to.all()
-        for user in users:
-            Notification.objects.create(
-                recipient=user,
-                message=f"New Announcement: {announcement.title}",
-                url=f"/announcements/{announcement.id}/"
-            )
-
-
-# === Finance ===
-class FeeInvoiceViewSet(viewsets.ModelViewSet):
-    queryset = FeeInvoice.objects.all()
-    serializer_class = FeeInvoiceSerializer
-    permission_classes = [IsClientAdmin, IsParent, IsStudent]
-
-class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-    permission_classes = [IsClientAdmin, IsParent, IsStudent]
-
-class PaymentPlanViewSet(viewsets.ModelViewSet):
-    queryset = PaymentPlan.objects.all()
-    serializer_class = PaymentPlanSerializer
-    permission_classes = [IsClientAdmin, IsParent, IsStudent]
-
-class PaymentInstallmentViewSet(viewsets.ModelViewSet):
-    queryset = PaymentInstallment.objects.all()
-    serializer_class = PaymentInstallmentSerializer
-    permission_classes = [IsClientAdmin, IsParent, IsStudent]
-
-# === Support System ===
-class SupportTicketViewSet(viewsets.ModelViewSet):
-    queryset = SupportTicket.objects.all()
-    serializer_class = SupportTicketSerializer
-    permission_classes = [IsClientAdmin, IsParent, IsStudent]
-
-class TicketResponseViewSet(viewsets.ModelViewSet):
-    queryset = TicketResponse.objects.all()
-    serializer_class = TicketResponseSerializer
-    permission_classes = [IsClientAdmin, IsParent, IsStudent]
-    
-class ExamViewSet(viewsets.ModelViewSet):
-    queryset = Exam.objects.all()
-    serializer_class = ExamSerializer
-    permission_classes = [IsAuthenticated]
-
-class QuestionViewSet(viewsets.ModelViewSet):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
-    permission_classes = [IsAuthenticated]
-
-class StudentResponseViewSet(viewsets.ModelViewSet):
-    queryset = StudentResponse.objects.all()
-    serializer_class = StudentResponseSerializer
-    permission_classes = [IsAuthenticated]
-
-class SubscriptionPlanViewSet(viewsets.ModelViewSet):
-    queryset = SubscriptionPlan.objects.all()
-    serializer_class = SubscriptionPlanSerializer
-    permission_classes = [IsAuthenticated]
-
-class ClientSubscriptionViewSet(viewsets.ModelViewSet):
-    queryset = ClientSubscription.objects.all()
-    serializer_class = ClientSubscriptionSerializer
-    permission_classes = [IsAuthenticated]
-    
-class NotificationListView(generics.ListAPIView):
-    serializer_class = NotificationSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Notification.objects.filter(recipient=self.request.user)
+User = get_user_model()
 
 def can_add_student(user):
     institution = user.institution
@@ -290,42 +113,61 @@ def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
+            # 1) Create inactive user
             user = form.save(commit=False)
             user.is_active = False
             user.save()
-            # Send activation email
-        current_site = get_current_site(request)
-        mail_subject = 'Activate your LSMS account'
-        message = render_to_string('registration/account_activation_email.html', {
-            'user': user,
-            'domain': current_site.domain,
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'token': account_activation_token.make_token(user),
-        })
-        email = EmailMessage(mail_subject, message, to=[user.email])
-        email.send()
 
-        return render(request, 'registration/please_confirm.html')  # Page to tell user to check email
+            # 2) Build activation email
+            current_site = get_current_site(request)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = account_activation_token.make_token(user)
+            activation_url = reverse('activate', kwargs={'uidb64': uid, 'token': token})
+            full_link = f"http://{current_site.domain}{activation_url}"
+
+
+            subject = 'Activate your LSMS account'
+            message = render_to_string(
+                'registration/account_activation_email.html',
+                {
+                    'user': user,
+                    'activation_link': full_link,
+                    'uid': uid,
+                    'token': token,
+                }
+            )
+
+            # 3) Send it
+            email = EmailMessage(subject, message, to=[user.email])
+            email.send(fail_silently=False)
+
+            # 4) Show the “check your inbox” page
+            return render(request, 'registration/please_confirm.html')
+
+        # If the form isn’t valid, we fall through to re-render it with errors
+
     else:
         form = SignUpForm()
+
     return render(request, 'registration/signup.html', {'form': form})
 
 def activate_account(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
-    if user and account_activation_token.check_token(user, token):
+    if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
         login(request, user)
+        messages.success(request, "Your account has been activated! 🎉")
         return redirect('dashboard-redirect')
     else:
+        messages.error(request, "Activation link is invalid or has expired.")
         return render(request, 'registration/activation_invalid.html')
-    
-    User = get_user_model()
+
 
 def resend_activation_email(request):
     if request.method == 'POST':

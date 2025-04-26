@@ -1,0 +1,1 @@
+web: gunicorn PROLSMS.wsgi --log-file -
