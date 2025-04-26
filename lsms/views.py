@@ -1,6 +1,7 @@
 # Create your views here.
 from datetime import timezone
 
+from PROLSMS import settings
 from .serializers import NotificationSerializer
 from rest_framework import viewsets
 from lsms.models import *
@@ -26,6 +27,7 @@ from django.utils.encoding import force_str
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from .tasks import send_activation_email
 
 User = get_user_model()
 
@@ -135,6 +137,12 @@ def signup_view(request):
                     'uid': uid,
                     'token': token,
                 }
+            )
+            send_activation_email.delay(
+                subject,
+                message,
+                [user.email],
+                from_email=settings.DEFAULT_FROM_EMAIL
             )
 
             # 3) Send it

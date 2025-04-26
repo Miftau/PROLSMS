@@ -21,3 +21,5 @@ gunicorn
 whitenoise
 psycopg2-binary
 djangorestframework-simplejwt
+celery>=5.2
+redis>=4.0
