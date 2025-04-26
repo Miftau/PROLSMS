@@ -116,8 +116,8 @@ def signup_view(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             # 1) Create inactive user
-            user = form.save(commit=False)
-            user.is_active = False
+            user = form.save(commit=True)
+            user.is_active = True
             user.save()
 
             # 2) Build activation email
