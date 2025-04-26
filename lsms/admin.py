@@ -24,7 +24,6 @@ class UserAdmin(BaseUserAdmin):
         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
         ('Institution & Role', {'fields': ('role', 'institution')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
-        ('Additional Info', {'fields': ('role', 'institution')})
     )
     
     def has_delete_permission(self, request, obj=None):
