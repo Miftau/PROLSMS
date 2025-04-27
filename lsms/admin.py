@@ -15,16 +15,37 @@ from .models import (
 
 # ========== USER & INSTITUTION ==========
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'role', 'institution', 'is_active', 'is_staff', 'is_superuser')
-    list_filter = ('role', 'institution', 'is_active', 'is_superuser')
-    search_fields = ('username', 'email')
+class CustomUserAdmin(BaseUserAdmin):
+    # 🧱 Add custom fields to the edit form
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Institution & Role', {'fields': ('role', 'institution')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (_('Custom Info'), {'fields': ('role', 'institution')}),
+        (_('Permissions'), {
+            'fields': (
+                'is_active', 'is_staff', 'is_superuser',
+                'groups', 'user_permissions'
+            ),
+        }),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
+
+    # 🧱 Fields visible when creating a new user
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'username', 'email', 'password1', 'password2',
+                'role', 'institution',
+                'is_active', 'is_staff', 'is_superuser',
+            ),
+        }),
+    )
+
+    list_display = ('username', 'email', 'role', 'institution', 'is_staff', 'is_superuser')
+    list_filter = ('role', 'institution', 'is_staff', 'is_superuser')
+    search_fields = ('username', 'email')
+    ordering = ('username',)
     
     def has_delete_permission(self, request, obj=None):
         return True
